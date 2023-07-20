@@ -1,5 +1,9 @@
 import argparse
 import json
+import random
+import re
+import jieba
+
 
 def parser_data():
     """
@@ -18,7 +22,7 @@ def parser_data():
 
     parser.add_argument("-f", "--file", help="题库文件", required=True)
     # TODO: 添加更多参数
-    
+    parser.add_argument("-w", "--which", help="指定哪一篇文章", required=False)
     args = parser.parse_args()
     return args
 
@@ -34,6 +38,7 @@ def read_articles(filename):
     """
     with open(filename, 'r', encoding="utf-8") as f:
         # TODO: 用 json 解析文件 f 里面的内容，存储到 data 中
+        data = json.loads(f)
     
     return data
 
@@ -50,8 +55,11 @@ def get_inputs(hints):
 
     keys = []
     for hint in hints:
-        print(f"请输入{hint}：")
+        print(f"请再输入词性：名词、动词、形容词、副词、代词、介词、连词、数词、量词、助词、感叹词、拟声词")
         # TODO: 读取一个用户输入并且存储到 keys 当中
+        part = input()
+        user_input = input()
+        keys.append(user_input)
 
     return keys
 
@@ -69,6 +77,7 @@ def replace(article, keys):
     for i in range(len(keys)):
         # TODO: 将 article 中的 {{i}} 替换为 keys[i]
         # hint: 你可以用 str.replace() 函数，也可以尝试学习 re 库，用正则表达式替换
+        article = article.replace("{{" + str(i + 1) + "}}", keys[i])
 
     return article
 
@@ -77,11 +86,26 @@ if __name__ == "__main__":
     args = parser_data()
     data = read_articles(args.file)
     articles = data["articles"]
-
+    articles_num = len(data["articles"])
+    article = None
     # TODO: 根据参数或随机从 articles 中选择一篇文章
-    # TODO: 给出合适的输出，提示用户输入
-    # TODO: 获取用户输入并进行替换
-    # TODO: 给出结果
+    if args.w is None:
+        rng = random.randint(0,articles_num)
+        article = data["articles"][rng]
+    else:
+        for i in data["articles"]:
+            if i["title"] == args.w:
+                article = i
+                break
 
+    # TODO: 给出合适的输出，提示用户输入
+    pattern = r"\{\{\d+\}\}"
+    matches = re.findall(pattern, article)
+    number = len(matches)
+    
+    # TODO: 获取用户输入并进行替换
+    keys = get_inputs()
+    # TODO: 给出结果
+    print(article,)
 
 
