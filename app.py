@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 # 设置页面标题
-st.title('Streamlit 示例：简单的数据应用')
+st.title('文章填词游戏')
 
 # 创建一个按钮，点击后显示提示信息
 q = st.button('点击这里查看提示')
