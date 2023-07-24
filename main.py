@@ -2,8 +2,19 @@ import argparse
 import json
 import random
 import re
-import jieba
 
+
+nouns = ["人", "狗", "花", "山", "水", "风"]
+verbs = ["跑", "吃", "睡", "看", "听", "玩"]
+adjectives = ["美丽", "快乐", "悲伤", "高兴", "聪明", "勇敢"]
+adverbs = ["快速地", "慢慢地", "高兴地", "难过地", "认真地"]
+
+pos_dict = {
+    "名词": nouns,
+    "动词": verbs,
+    "形容词": adjectives,
+    "副词": adverbs,
+}
 
 def parser_data():
     """
@@ -36,13 +47,33 @@ def read_articles(filename):
 
     :return: 一个字典，题库内容
     """
-    with open(filename, 'r', encoding="utf-8") as f:
-        # TODO: 用 json 解析文件 f 里面的内容，存储到 data 中
-        data = json.loads(f)
-    
+    try:
+        with open(filename, 'r', encoding="utf-8") as f:  
+            # TODO: 用 json 解析文件 f 里面的内容，存储到 data 中
+            file_content = f.read()  # 读取文件内容为字符串
+
+        data = json.loads(file_content)
+    except Exception as e :
+        print(f"发生错误：{e}")
+        return None
     return data
 
+# def find_max_placeholder_index(article):
+#     """
+#     查找文章中所有 {{i}} 形式的字符串，并得到最大的 i 值
 
+#     :param article: 文章内容
+
+#     :return: 最大的 i 值，如果没有找到 {{i}} 形式的字符串，返回 0
+#     """
+#     pattern = r"\{\{(\d+)\}\}"
+#     matches = re.findall(pattern, article)
+
+#     if matches:
+#         max_index = max(int(index) for index in matches)
+#         return max_index
+#     else:
+#         return 0
 
 def get_inputs(hints):
     """
@@ -55,9 +86,8 @@ def get_inputs(hints):
 
     keys = []
     for hint in hints:
-        print(f"请再输入词性：名词、动词、形容词、副词、代词、介词、连词、数词、量词、助词、感叹词、拟声词")
-        # TODO: 读取一个用户输入并且存储到 keys 当中
-        part = input()
+        print(hint)
+            
         user_input = input()
         keys.append(user_input)
 
@@ -88,23 +118,24 @@ if __name__ == "__main__":
     articles = data["articles"]
     articles_num = len(data["articles"])
     article = None
+    hints = None
     # TODO: 根据参数或随机从 articles 中选择一篇文章
-    if args.w is None:
+    if args.which is None:
         rng = random.randint(0,articles_num)
-        article = data["articles"][rng]
+        article = data["articles"][rng]["article"]
+        hints = data["articles"][rng]["hints"]
     else:
         for i in data["articles"]:
-            if i["title"] == args.w:
-                article = i
+            if i["title"] == args.which:
+                article = i["article"]
+                hints = i["hints"]
                 break
 
     # TODO: 给出合适的输出，提示用户输入
-    pattern = r"\{\{\d+\}\}"
-    matches = re.findall(pattern, article)
-    number = len(matches)
-    
+
+    keys = get_inputs(hints=hints)
     # TODO: 获取用户输入并进行替换
-    keys = get_inputs()
+    article = replace(article=article,keys=keys)
     # TODO: 给出结果
     print(article,)
 
